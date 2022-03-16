@@ -13,6 +13,7 @@ x = np.array(([0,0],
              [1,1])) #0,1,1,0
 
 a = 0.001 #alpha value
+m = np.shape(x)[0]
 
 #[5,2]
 t = np.random.uniform(-1, 1, (Config.networksize[1]+1,Config.networksize[0],Config.networksize[0]+1)) #[# of layers, # of neurons, # of neurons + 1 to account for bias unit]
@@ -35,11 +36,13 @@ y = np.array(([1,0],
 h0 = np.array((0.999,0.001,0.001,0.999))
 h1 = np.array((0.001,0.999,0.999,0.001))
 
-c = 0
+c = 0 #cost
+g = [np.zeros(np.shape(t[0])), np.zeros(np.shape(t[1])), np.zeros(np.shape(t[2]))] #gradient
 for j in range(0,1000):
     for i in range(0, np.shape(x)[0]):
         hypothesis0 = hypothesis.hypothesis(x[i], t)
         gradient = computeGradient.computeGradient(x[i], t, y[i])
+
 
         cost0 = cost.cost(hypothesis0,y[i])
 
@@ -49,13 +52,18 @@ for j in range(0,1000):
         # print("actual: {}".format(y[i]))
         # print("cost: {}".format(cost0))
 
-        thetaList[0] = thetaList[0] - a*gradient[0]
-        thetaList[1] = thetaList[1] - a*gradient[1]
-        thetaList[2] = thetaList[2] - a*gradient[2]
-        t = thetaList
+        g[0] = g[0] + gradient[0]
+        g[1] = g[1] + gradient[1]
+        g[2] = g[2] + gradient[2]
 
         c = cost0
+    print(np.shape(t))
+    print(np.shape(g))
 
+    t[0] = t[0] - g[0]/m
+    t[1] = t[1] - g[1]/m
+    t[2] = t[2] - g[2]/m
+    g = [np.zeros(np.shape(t[0])), np.zeros(np.shape(t[1])), np.zeros(np.shape(t[2]))]
     print(c)
 
 print("finished, final results:")
