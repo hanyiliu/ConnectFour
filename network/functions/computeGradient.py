@@ -18,17 +18,22 @@ def computeGradient(x, t, y): #For only one input and output right now
     deltaList.insert(0, delta) #delta 4
 
 
-    z[1] = np.insert(z[1], 0, 0, axis=0) #add 0 to account for bias unit
+
+    z[1] = np.insert(z[1], 0, 1, axis=0) #add 0 to account for bias unit
     delta = np.dot(t[2].T,delta)*sigmoidGradient(z[1])
     delta = np.delete(delta, 0) #remove bias unit's delta
     deltaList.insert(0, delta) #delta 3
 
-    z[0] = np.insert(z[0], 0, 0, axis=0) #add 0 to account for bias unit
+
+    z[0] = np.insert(z[0], 0, 1, axis=0) #add 0 to account for bias unit
     delta = np.dot(t[1].T,delta)*sigmoidGradient(z[0])
     delta = np.delete(delta, 0) #remove bias unit's delta
     deltaList.insert(0, delta) #delta 2 (does not need delta 1)
 
-    print(deltaList)
-    print(np.shape(deltaList[2]))
-    print(np.shape(deltaList[1]))
-    print(np.shape(deltaList[0]))
+    gradient0 = np.dot(np.array([deltaList[0]]).T,np.array([a[0]]))
+    gradient1 = np.dot(np.array([deltaList[1]]).T,np.array([a[1]]))
+    gradient2 = np.dot(np.array([deltaList[2]]).T,np.array([a[2]]))
+
+    gradientList = [gradient0, gradient1, gradient2]
+
+    return gradientList

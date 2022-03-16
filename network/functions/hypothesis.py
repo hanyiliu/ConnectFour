@@ -7,32 +7,33 @@ def sigmoid(z):
 
 def hypothesis(x, t, computingGradient = False, printData = False):
 
-    print("Starting hypothesis")
 
     aList = []
     zList = []
 
     x = np.insert(x, 0, 1, axis=0) #Add bias unit to input
+    aList.append(x) #a0
+
 
     z = np.dot(t[0], x)
-    zList.append(z)
+    zList.append(z) #z0
     a = sigmoid(z)
-    aList.append(a)
     a = np.insert(a, 0, 1, axis=0) #Add bias unit to a
+    aList.append(a) #a1
 
     z = np.dot(t[1], a)
-    zList.append(z)
+    zList.append(z) #z1
     a = sigmoid(z)
-    aList.append(a)
     a = np.insert(a, 0, 1, axis=0) #Add bias unit to a
+    aList.append(a) #a2
 
     #TODO: put this into a for loop later on
 
     h = np.dot(t[2], a)
-    zList.append(h)
+    zList.append(h) #z2
 
     h = sigmoid(h)
-    aList.append(h)
+    aList.append(h) #a3
 
     if computingGradient:
         return h, aList, zList
