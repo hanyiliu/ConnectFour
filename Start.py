@@ -5,6 +5,19 @@ from network.functions import cost
 from network.functions import hypothesis
 from network.functions import computeGradient
 
+from game import ConnectFour
+
+##################################################################
+#       Plan of attack:
+#           - run game i times
+#           - after i iterations, feed data into network
+#           - train both players, but with differing values
+#           - after training completes, repeat overall loop
+#       - then itll all magically work right
+##################################################################
+
+ConnectFour.main()
+
 np.set_printoptions(edgeitems=30, linewidth=100000)
 
 x = np.array(([0,0],
@@ -46,11 +59,6 @@ for j in range(0,1000):
 
         cost0 = cost.cost(hypothesis0,y[i])
 
-        #
-        # print("input: {}".format(x[i]))
-        # print("hypothesis: {}".format(hypothesis0))
-        # print("actual: {}".format(y[i]))
-        # print("cost: {}".format(cost0))
 
         g[0] = g[0] + gradient[0]
         g[1] = g[1] + gradient[1]
@@ -71,29 +79,3 @@ print(hypothesis.hypothesis(x[0],t))
 print(hypothesis.hypothesis(x[1],t))
 print(hypothesis.hypothesis(x[2],t))
 print(hypothesis.hypothesis(x[3],t))
-
-
-
-
-# hypothesis0 = hypothesis.hypothesis(x[i], t)
-# gradient = computeGradient.computeGradient(x[0], t, y[i])
-#
-# cost0 = cost.cost(hypothesis0,y[i])
-#
-#
-# print("input: {}".format(x[i]))
-# print("hypothesis: {}".format(hypothesis0))
-# print("actual: {}".format(y[i]))
-# print("cost: {}".format(cost0))
-#
-#
-#
-# hypothesis1 = hypothesis.hypothesis(x[i], t)
-# cost1 = cost.cost(hypothesis1, y[i])
-#
-# print("hypothesis: {}".format(hypothesis1))
-# print("actual: {}".format(y[i]))
-# print("cost: {}".format(cost1))
-#
-# print("theta shape: {}, {}, {}".format(np.shape(thetaList[0]), np.shape(thetaList[1]), np.shape(thetaList[2])))
-# print("gradient shape: {}, {}, {}".format(np.shape(gradient[0]), np.shape(gradient[1]), np.shape(gradient[2])))

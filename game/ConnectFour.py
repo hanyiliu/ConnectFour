@@ -10,6 +10,9 @@ board = np.zeros((6,7)) #2D array of board in numerical values #column, row
 turn = 0 #0 = player 1, 1 = player 2
 displayWinner = Label(text="Winner: ", justify="left", anchor="w")
 
+#Data storage
+round = [] #list of board values
+
 def count_consecutive(arr, n):
     # pad a with False at both sides for edge cases when array starts or ends with n
     d = np.diff(np.concatenate(([False], arr == n, [False])).astype(int))
@@ -38,12 +41,12 @@ def check(x,y):
             print("Player 1 Wins.")
             displayWinner.config(text="Winner: Player 1")
             inputStatus(False)
+            win(True)
         elif np.any(count_consecutive(v[i],2) >= Config.mustConnect):
             print("Player 2 Wins.")
             displayWinner.config(text="Winner: Player 2")
             inputStatus(False)
-
-
+            win(False)
 
 def move(column): #places piece in column
     global turn
@@ -79,7 +82,9 @@ def reset():
 
     inputStatus(True)
 
-
+def win(winner): #takes boolean, true for player 1 winning, false for player 2
+    print("Beginning data storage")
+    print(board.flatten())
 
 
 def main():
