@@ -2,6 +2,7 @@ from tkinter import *
 from functools import partial
 import numpy as np
 import Config
+import os
 
 size = [6,7] #rows, columns; i = row, j = column
 rows = [] #2D array
@@ -11,7 +12,8 @@ turn = 0 #0 = player 1, 1 = player 2
 displayWinner = Label(text="Winner: ", justify="left", anchor="w")
 
 #Data storage
-round = [] #list of board values
+player1Data = ([],[]) #list of board values
+player2Data = ([],[])
 
 def count_consecutive(arr, n):
     # pad a with False at both sides for edge cases when array starts or ends with n
@@ -55,10 +57,23 @@ def move(column): #places piece in column
     for i in range(size[0]-1,-1,-1): #reversed iteration because piece goes to bottom, not top lol
         if(rows[i][column].cget("disabledbackground") == "white"):
             if(turn == 0):
+                #storing data
+                player1Data[0].append(board.flatten())
+                player1Data[1].append(column)
+
+                #updating board
                 rows[i][column].config(disabledbackground="red")
                 board[i][column] = Config.playerValue
                 turn = 1
+
+
+
             else:
+                #storing data
+                player2Data[0].append(board.flatten())
+                player2Data[1].append(column)
+
+                #updating board
                 rows[i][column].config(disabledbackground="yellow")
                 board[i][column] = Config.opponentValue
                 turn = 0
@@ -83,15 +98,62 @@ def reset():
     inputStatus(True)
 
 def win(winner): #takes boolean, true for player 1 winning, false for player 2
-    print("Beginning data storage")
-    print(board.flatten())
+    print(winner)
+    #beginning data storage
+
+
+
+    if winner: #player 1
+        #saves input (board values)
+        if os.stat(Config.player1InputDir).st_size == 0: #if empty, write file. Otherwise, append to existing data
+            np.savetxt(Config.player1InputDir, player1Data[0], fmt='%i')
+        else:
+            np.savetxt(Config.player1InputDir, np.append(np.genfromtxt(Config.player1InputDir), player1Data[0], 0), fmt='%i')
+
+        #saves output (player choices)
+        if os.stat(Config.player1OutputDir).st_size == 0:
+            np.savetxt(Config.player1OutputDir, player1Data[1], fmt='%i')
+        else:
+            np.savetxt(Config.player1OutputDir, np.append(np.genfromtxt(Config.player1OutputDir), player1Data[1], 0), fmt='%i')
+    else: #player 2
+        #saves input (board values)
+        if os.stat(Config.player2InputDir).st_size == 0:
+            np.savetxt(Config.player2InputDir, player2Data[0], fmt='%i')
+        else:
+            np.savetxt(Config.player2InputDir, np.append(np.genfromtxt(Config.player2InputDir), player2Data[0], 0), fmt='%i')
+
+        #saves output (player choices)
+        if os.stat(Config.player2OutputDir).st_size == 0:
+            np.savetxt(Config.player2OutputDir, player2Data[1], fmt='%i')
+        else:
+            np.savetxt(Config.player2OutputDir, np.append(np.genfromtxt(Config.player2OutputDir), player2Data[1], 0), fmt='%i')
 
 
 def main():
 
 
-    for i in range(size[0]): #create each point on board
+    #create files for data storage (if not present)
+    try:
+        open(Config.player1InputDir, 'x')
+    except FileExistsError:
+        print("Player 1 input file exists.")
 
+    try:
+        open(Config.player1OutputDir, 'x')
+    except FileExistsError:
+        print("Player 1 output file exists.")
+
+    try:
+        open(Config.player2InputDir, 'x')
+    except FileExistsError:
+        print("Player 2 input file exists.")
+
+    try:
+        open(Config.player2OutputDir, 'x')
+    except FileExistsError:
+        print("Player 2 output file exists.")
+
+    for i in range(size[0]): #create each point on board
         cols = []
 
         for j in range(size[1]):

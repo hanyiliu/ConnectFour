@@ -12,5 +12,8 @@ output = 2 #number of output units
 lamb = 1
 
 #Data
-inputDir = "data/input.txt"
-outputDir = "data/output.txt"
+player1InputDir = "data/player1/input.txt"
+player1OutputDir = "data/player1/output.txt"
+
+player2InputDir = "data/player2/input.txt"
+player2OutputDir = "data/player2/output.txt"
