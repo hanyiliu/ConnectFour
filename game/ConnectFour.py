@@ -33,16 +33,13 @@ def inputStatus(status):
             buttons[i].config(state=DISABLED)
 
 def check(x,y):
-    print("board: {}".format(board))
     vert = board[x] #add 0 zero, need 7
     hori = np.pad(board[:,y], (0, 1), 'constant') #add 1 zero
     diag = np.pad(np.diagonal(board,offset=(y-x)), (0, 7-np.size(np.diagonal(board,offset=(y-x)))), 'constant')
     fdiag = np.pad(np.diagonal(np.flip(board,axis=1),offset=(6-y-x)), (0, 7-np.size(np.diagonal(np.flip(board,axis=1),offset=(6-y-x)))), 'constant') #flipped diagonal
 
     v = np.array((vert,hori,diag,fdiag))
-    print("v: {}".format(v))
     for i in range(np.size(v,0)):
-        print(i)
         if np.any(count_consecutive(v[i],1) >= Config.mustConnect):
             print("Player 1 Wins.")
             displayWinner.config(text="Winner: Player 1")
@@ -132,8 +129,9 @@ def win(winner): #takes boolean, true for player 1 winning, false for player 2
         else:
             np.savetxt(Config.player2OutputDir, np.append(np.genfromtxt(Config.player2OutputDir), player2Data[1], 0), fmt='%i')
 
-    if Config.autoReset:
+    if Config.training:
         reset()
+        simulate.setEndStatus(True)
 
 def main():
 

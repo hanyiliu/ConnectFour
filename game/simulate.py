@@ -20,5 +20,6 @@ def simulate(rounds, buttons):
         while not endStatus():
             buttons[randrange(7)].invoke()
             time.sleep(.2)
-        print("finished")
-        
+        print("finished round {}".format(iterations))
+        iterations += 1
+        setEndStatus(False)
