@@ -1,11 +1,13 @@
 import numpy as np
 import Config
+import threading
 
 from network.functions import cost
 from network.functions import hypothesis
 from network.functions import computeGradient
 
 from game import ConnectFour
+from game import simulate
 
 ##################################################################
 #       Plan of attack:
@@ -15,6 +17,9 @@ from game import ConnectFour
 #           - after training completes, repeat overall loop
 #       - then itll all magically work right
 ##################################################################
+
+gameThread = threading.Thread(target=simulate.simulate, args=(10, ConnectFour.getButtons()))
+gameThread.start()
 
 ConnectFour.main()
 
@@ -41,17 +46,9 @@ for i in range(0, np.shape(t)[0]):
         thetaList.append(t[i])
 
 t = thetaList
-y = np.array(([1,0],
-              [0,1],
-              [0,1],
-              [1,0])) #[False,True]
-
-h0 = np.array((0.999,0.001,0.001,0.999))
-h1 = np.array((0.001,0.999,0.999,0.001))
-
 c = 0 #cost
 g = [np.zeros(np.shape(t[0])), np.zeros(np.shape(t[1])), np.zeros(np.shape(t[2]))] #gradient
-for j in range(0,1000):
+for j in range(0,1000): #1000 iterations
     for i in range(0, np.shape(x)[0]):
         hypothesis0 = hypothesis.hypothesis(x[i], t)
         gradient = computeGradient.computeGradient(x[i], t, y[i])

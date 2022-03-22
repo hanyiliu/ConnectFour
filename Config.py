@@ -2,9 +2,10 @@
 playerValue = 1
 opponentValue = 2
 mustConnect = 4
+autoReset = True #Set to true if training datasets
 
 #Training
-networksize = (5,2) #neurons per layer, number of layers
+networksize = (5,2) #neurons per layer, number of layers #TODO: cannot change layers, must fix
 
 input = 2 #number of input units
 output = 2 #number of output units
