@@ -3,7 +3,6 @@ from functools import partial
 import numpy as np
 import Config
 import os
-from game import simulate
 
 size = [6,7] #rows, columns; i = row, j = column
 rows = [] #2D array
@@ -18,6 +17,9 @@ player2Data = ([],[])
 
 def getButtons():
     return buttons
+
+def getBoard():
+    return board
 
 def count_consecutive(arr, n):
     # pad a with False at both sides for edge cases when array starts or ends with n
@@ -129,7 +131,7 @@ def win(winner): #takes boolean, true for player 1 winning, false for player 2
         else:
             np.savetxt(Config.player2OutputDir, np.append(np.genfromtxt(Config.player2OutputDir), player2Data[1], 0), fmt='%i')
 
-    if Config.training:
+    if Config.autoReset:
         reset()
         simulate.setEndStatus(True)
 
@@ -199,8 +201,6 @@ def main():
     #automated loops
 
     mainloop()
-
-    simulate.simulate(10,buttons)
 
 
 
