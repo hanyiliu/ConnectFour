@@ -1,10 +1,18 @@
 from random import randrange
 import time
 import numpy as np
+import statistics
 
 from network.functions import hypothesis
 from game import ConnectFour
 import Config
+
+#Statistics
+forceMoves = 0
+wins = 0
+averageCertainty = 0 #average of all guesses' certainty by the network. The lower the value, the more representative of simple guess and check
+certainties = []
+
 
 def reformTheta(t): #takes flattened thetas
     thetaList = []
@@ -38,6 +46,14 @@ def simulate(rounds):
     print("beginning simulation")
     iterations = 0
 
+    if Config.eraseBeforeRound:
+        if Config.trainingPlayer == 1:
+            open(Config.player1InputDir, 'w').close()
+            open(Config.player1OutputDir, 'w').close()
+        elif Config.trainingPlayer == 2:
+            open(Config.player2InputDir, 'w').close()
+            open(Config.player2OutputDir, 'w').close()
+
     while iterations < rounds:
         print("round: {}".format(iterations))
         while not ConnectFour.getEndStatus():
@@ -49,22 +65,36 @@ def simulate(rounds):
                 if Config.forceMove:
                     while not np.any(ConnectFour.getBoard()[:,move] == 0): #checks to see if there is available space in column
                         print("called")
-                        guess[move] = 0
+                        global forceMoves
+                        forceMoves += 1
+                        guess[move] = -guess[move]
                         move = np.argmax(guess)
                 buttons[move].invoke()
+                certainty = np.abs(guess[move])/np.sum(np.abs(guess)) #guess certainty divided by overall certainty
+                certainties.append(certainty)
+                print("guess certainty: {}".format(certainty*100))
             elif ConnectFour.getTurn() == 1:
-                # guess = hypothesis.hypothesis(ConnectFour.getBoard().flatten(), player2Theta)
-                # print("player 2, network guess: {}".format(np.argmax(guess)))
-                #
-                # move = np.argmax(guess)
-                # if Config.forceMove:
-                #     while not np.any(ConnectFour.getBoard()[:,move] == 0): #checks to see if there is available space in column
-                #         print("called")
-                #         guess[move] = 0
-                #         move = np.argmax(guess)
+                # # guess = hypothesis.hypothesis(ConnectFour.getBoard().flatten(), player2Theta) #uses neural network
+                # # print("player 2, network guess: {}".format(np.argmax(guess)))
+                # #
+                # # move = np.argmax(guess)
+                # # if Config.forceMove:
+                # #     while not np.any(ConnectFour.getBoard()[:,move] == 0): #checks to see if there is available space in column
+                # #         print("called")
+                # #         guess[move] = 0
+                # #         move = np.argmax(guess)
                 buttons[randrange(7)].invoke()
+                # while ConnectFour.getTurn() == 1: #waits for user input
+                #     time.sleep(0.1)
             time.sleep(Config.waitTime)
+
         ConnectFour.reset()
-        print("finished round {}".format(iterations))
+
+        averageCertainty = statistics.mean(certainties)
+        print("finished iteration {}\n".format(iterations))
         iterations += 1
-        
+
+    print("finished\n")
+    print("forcedMoves: {}".format(forceMoves))
+    print("averageCertainty: %.2f" % (averageCertainty*100))
+    iterations += 1

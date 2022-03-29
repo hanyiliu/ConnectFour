@@ -7,6 +7,7 @@ simulate = True #Set to true if simulating datasets (training must be True too)
 autoReset = False #Automatically reset upon winner
 
 #simulation
+eraseBeforeRound = True #Erase data before every full simulation (only erases player being trained's data)
 forceMove = True #Set to true if manually forcing network to go to other options when first option is unavailable (column already filled)
 waitTime = 0.2 #How long to wait inbetween moves (ms)
 #Training
