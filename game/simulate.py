@@ -1,17 +1,10 @@
 from random import randrange
 import time
+import numpy as np
 
 from network.functions import hypothesis
 from game import ConnectFour
 import Config
-
-
-end = False
-def endStatus():
-    return end
-def setEndStatus(newStatus):
-    global end
-    end = newStatus
 
 def reformTheta(t): #takes flattened thetas
     thetaList = []
@@ -29,28 +22,49 @@ def reformTheta(t): #takes flattened thetas
             numberOfThetas = Config.networksize[0]*(Config.networksize[0]+1)
             theta = np.reshape(t[0:numberOfThetas], (Config.networksize[0],Config.networksize[0]+1))
 
-        print("thetas: {}".format(numberOfThetas))
         t = t[numberOfThetas:]
+        thetaList.append(theta)
+
+    return thetaList
 
 
 def simulate(rounds):
 
-    ConnectFour.main()
+    player1Theta = reformTheta(np.genfromtxt(Config.player1ThetaDir))
+    player2Theta = reformTheta(np.genfromtxt(Config.player2ThetaDir))
 
     time.sleep(3)
     buttons = ConnectFour.getButtons()
     print("beginning simulation")
     iterations = 0
 
-    reformTheta(1)
-
     while iterations < rounds:
         print("round: {}".format(iterations))
+        while not ConnectFour.getEndStatus():
+            if ConnectFour.getTurn() == 0:
+                guess = hypothesis.hypothesis(ConnectFour.getBoard().flatten(), player1Theta)
+                print("player 1, network guess: {}".format(np.argmax(guess)))
 
-        while not endStatus():
-            guess = hypothesis.hypothesis(ConnectFour.getBoard, )
-            buttons[randrange(7)].invoke()
-            time.sleep(.2)
+                move = np.argmax(guess)
+                if Config.forceMove:
+                    while not np.any(ConnectFour.getBoard()[:,move] == 0): #checks to see if there is available space in column
+                        print("called")
+                        guess[move] = 0
+                        move = np.argmax(guess)
+                buttons[move].invoke()
+            elif ConnectFour.getTurn() == 1:
+                # guess = hypothesis.hypothesis(ConnectFour.getBoard().flatten(), player2Theta)
+                # print("player 2, network guess: {}".format(np.argmax(guess)))
+                #
+                # move = np.argmax(guess)
+                # if Config.forceMove:
+                #     while not np.any(ConnectFour.getBoard()[:,move] == 0): #checks to see if there is available space in column
+                #         print("called")
+                #         guess[move] = 0
+                #         move = np.argmax(guess)
+                buttons[randrange(7)].invoke()
+            time.sleep(Config.waitTime)
+        ConnectFour.reset()
         print("finished round {}".format(iterations))
         iterations += 1
-        setEndStatus(False)
+        

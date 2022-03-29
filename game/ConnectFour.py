@@ -9,6 +9,7 @@ rows = [] #2D array
 buttons = []
 board = np.zeros((6,7)) #2D array of board in numerical values #column, row
 turn = 0 #0 = player 1, 1 = player 2
+endStatus = False
 displayWinner = Label(text="Winner: ", justify="left", anchor="w")
 
 #Data storage
@@ -20,6 +21,15 @@ def getButtons():
 
 def getBoard():
     return board
+
+def getTurn():
+    return turn
+
+def getEndStatus():
+    return endStatus
+def setEndStatus(newStatus):
+    global endStatus
+    endStatus = newStatus
 
 def count_consecutive(arr, n):
     # pad a with False at both sides for edge cases when array starts or ends with n
@@ -55,7 +65,6 @@ def check(x,y):
 
 def move(column): #places piece in column
     global turn
-    print("moving: {}".format(column))
 
     for i in range(size[0]-1,-1,-1): #reversed iteration because piece goes to bottom, not top lol
         if(rows[i][column].cget("disabledbackground") == "white"):
@@ -97,11 +106,14 @@ def reset():
     board = np.zeros((6,7)) #2D array of board in numerical values #column, row
     turn = 0 #0 = player 1, 1 = player 2
     displayWinner.config(text="Winner: ")
-
     inputStatus(True)
+    setEndStatus(False)
 
 def win(winner): #takes boolean, true for player 1 winning, false for player 2
     print(winner)
+    global endStatus
+    endStatus = True
+    print("endstatus set to true")
     #beginning data storage
 
 
@@ -131,9 +143,6 @@ def win(winner): #takes boolean, true for player 1 winning, false for player 2
         else:
             np.savetxt(Config.player2OutputDir, np.append(np.genfromtxt(Config.player2OutputDir), player2Data[1], 0), fmt='%i')
 
-    if Config.autoReset:
-        reset()
-        simulate.setEndStatus(True)
 
 def main():
 

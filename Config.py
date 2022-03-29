@@ -6,6 +6,9 @@ training = False #Set to true if training datasets
 simulate = True #Set to true if simulating datasets (training must be True too)
 autoReset = False #Automatically reset upon winner
 
+#simulation
+forceMove = True #Set to true if manually forcing network to go to other options when first option is unavailable (column already filled)
+waitTime = 0.2 #How long to wait inbetween moves (ms)
 #Training
 networksize = (42,2) #neurons per layer, number of layers #TODO: cannot change layers, must fix
 #TODO: the number of neurons per layer currently has to be greater than the number of input and output units; this can be fixed but im lazy
@@ -16,7 +19,7 @@ output = 7 #number of output units
 lamb = 1
 alpha = 0.001 #alpha value
 iterations = 5 #for actually training thetas
-trainingPlayer = 1 #which player is currently being trained
+trainingPlayer = 2 #which player is currently being trained
 
 #Data
 gameIterations = 10 #for creating dataset
