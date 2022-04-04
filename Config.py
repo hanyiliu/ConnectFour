@@ -20,7 +20,8 @@ output = 7 #number of output units
 lamb = 1
 alpha = 0.001 #alpha value
 iterations = 5 #for actually training thetas
-trainingPlayer = 2 #which player is currently being trained
+trainingPlayer = 0 #which player is currently being trained
+randomTheta = False #generate random theta values at beginning of training
 
 #Data
 gameIterations = 10 #for creating dataset
