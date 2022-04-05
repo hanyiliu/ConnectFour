@@ -13,8 +13,8 @@ endStatus = False
 displayWinner = Label(text="Winner: ", justify="left", anchor="w")
 
 #Data storage
-player1Data = ([],[]) #list of board values
-player2Data = ([],[])
+player1Data = ([],[]) #list of board values, choice
+player2Data = ([],[]) #list of board values, choice
 
 def getButtons():
     return buttons
@@ -116,10 +116,23 @@ def win(winner): #takes boolean, true for player 1 winning, false for player 2
     print("endstatus set to true")
     #beginning data storage
 
+    print(np.shape(player1Data[0])[0])
 
 
     if winner: #player 1
         #saves input (board values)
+        epsilon = 1
+        epsilonList = np.zeros((0,0))
+        for i in range(0,np.shape(player1Data[0])[0]):
+            epsilonList = np.append(epsilonList,epsilon)
+            epsilon = epsilon * Config.epsilonRate
+
+        #saves epsilons
+        if os.stat(Config.player1EpsilonDir).st_size == 0: #if empty, write file. Otherwise, append to existing data
+            np.savetxt(Config.player1EpsilonDir, epsilonList)
+        else:
+            np.savetxt(Config.player2EpsilonDir, np.append(np.genfromtxt(Config.player1EpsilonDir), epsilonList, 0))
+
         if os.stat(Config.player1InputDir).st_size == 0: #if empty, write file. Otherwise, append to existing data
             np.savetxt(Config.player1InputDir, player1Data[0], fmt='%i')
         else:
@@ -132,6 +145,18 @@ def win(winner): #takes boolean, true for player 1 winning, false for player 2
             np.savetxt(Config.player1OutputDir, np.append(np.genfromtxt(Config.player1OutputDir), player1Data[1], 0), fmt='%i')
     else: #player 2
         #saves input (board values)
+        epsilon = 1
+        epsilonList = np.zeros((0,0))
+        for i in range(0,np.shape(player2Data[0])[0]):
+            epsilonList = np.append(epsilonList,epsilon)
+            epsilon = epsilon * Config.epsilonRate
+
+        #saves epsilons
+        if os.stat(Config.player2EpsilonDir).st_size == 0: #if empty, write file. Otherwise, append to existing data
+            np.savetxt(Config.player2EpsilonDir, epsilonList)
+        else:
+            np.savetxt(Config.player2EpsilonDir, np.append(np.genfromtxt(Config.player2EpsilonDir), epsilonList, 0))
+
         if os.stat(Config.player2InputDir).st_size == 0:
             np.savetxt(Config.player2InputDir, player2Data[0], fmt='%i')
         else:

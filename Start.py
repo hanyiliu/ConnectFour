@@ -8,6 +8,9 @@ from network.functions import train
 from game import ConnectFour
 from game import simulate
 
+import warnings
+warnings.filterwarnings("error")
+
 ##################################################################
 #       Plan of attack:
 #           - run game i times
@@ -16,6 +19,10 @@ from game import simulate
 #           - after training completes, repeat overall loop
 #       - then itll all magically work right
 #       TODO: include randomization if needed
+#
+#       Alternate plan of attack:
+#           - get feedback from game (reinforced learning)
+#           - add data to dataset for every time player connets three or four slots (add multiple examples of same value to create bias)
 ##################################################################
 
 def toBinary(y):
@@ -63,24 +70,34 @@ except FileExistsError:
 if Config.trainingPlayer == 1: #get training data
     x = np.genfromtxt(Config.player1InputDir)
     y = toBinary(np.genfromtxt(Config.player1OutputDir))
-    train.train(x,y,0)
+    epsilon = np.genfromtxt(Config.player1EpsilonDir)
+    train.train(x,y,epsilon,0)
     print("finished training player 1")
 elif Config.trainingPlayer == 2:
     x = np.genfromtxt(Config.player2InputDir)
     y = toBinary(np.genfromtxt(Config.player2OutputDir))
-    train.train(x,y,1)
+    epsilon = np.genfromtxt(Config.player2EpsilonDir)
+    train.train(x,y,epsilon,1)
     print("finished training player 2")
 elif Config.trainingPlayer == 0: #training both
+    try:
+        x = np.genfromtxt(Config.player1InputDir)
+        y = toBinary(np.genfromtxt(Config.player1OutputDir))
+        epsilon = np.genfromtxt(Config.player1EpsilonDir)
+        train.train(x,y,epsilon,0)
+        print("finished training player 1")
+    except UserWarning:
+        print("no user 1 data. skipping training")
 
-    x = np.genfromtxt(Config.player1InputDir)
-    y = toBinary(np.genfromtxt(Config.player1OutputDir))
-    train.train(x,y,0)
-    print("finished training player 1")
 
-    x = np.genfromtxt(Config.player2InputDir)
-    y = toBinary(np.genfromtxt(Config.player2OutputDir))
-    train.train(x,y,1)
-    print("finished training player 2")
+    try:
+        x = np.genfromtxt(Config.player2InputDir)
+        y = toBinary(np.genfromtxt(Config.player2OutputDir))
+        epsilon = np.genfromtxt(Config.player2EpsilonDir)
+        train.train(x,y,epsilon,1)
+        print("finished training player 2")
+    except UserWarning:
+        print("no user 2 data. skipping training")
 
 print("data shapes:")
 print("x: {}".format(np.shape(x)))

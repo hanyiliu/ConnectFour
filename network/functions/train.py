@@ -6,7 +6,7 @@ from network.functions import hypothesis
 from network.functions import computeGradient
 from network.functions import reform
 
-def train(x, y, player): #player = 0,1
+def train(x, y, epsilon, player): #player = 0,1
     a = 0.001 #alpha value
     m = np.shape(x)[0]
 
@@ -29,7 +29,7 @@ def train(x, y, player): #player = 0,1
         if player == 0:
             t = reform.reformTheta(np.genfromtxt(Config.player1ThetaDir))
         if player == 1:
-            t = reform.reformTheta(np.genfromtxt(Config.player2ThetaDir))
+            t = reform.reformTheta(np.genfromtxt(Config.player1ThetaDir))
         else:
             print("ok how are u actually here now")
     costs = []
@@ -43,10 +43,10 @@ def train(x, y, player): #player = 0,1
 
             cost0 = cost.cost(hypothesis0,y[i])
 
-
-            g[0] = g[0] + gradient[0]
-            g[1] = g[1] + gradient[1]
-            g[2] = g[2] + gradient[2]
+            #either place epsilon here or place at t - g
+            g[0] = g[0] + epsilon[i]*gradient[0]
+            g[1] = g[1] + epsilon[i]*gradient[1]
+            g[2] = g[2] + epsilon[i]*gradient[2]
 
             costs.append(cost0)
             c = cost0
