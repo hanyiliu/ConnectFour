@@ -1,12 +1,24 @@
 import numpy as np
 import Config
 
+from network.functions import reform
+
 def sigmoid(z):
     #print(-z)
     return 1.0 / (1.0 + np.exp(-z.astype(np.longdouble)))
 
-def hypothesis(x, t, computingGradient = False, printData = False):
+def hypothesis(t, x, placeholder=0, computingGradient = False, printData = False):
+    print(type(t))
+    if isinstance(t,np.ndarray):
+        print(np.shape(t))
+    if isinstance(t,np.ndarray) and np.shape(t)[0] == 1:
+        print("yes")
+        t = reform.reformTheta(t) #for bfgs, whose theta input is flattened
 
+
+    print("hypothesis shapes:")
+    #print("theta: {}".format(np.shape(t)))
+    print("x: {}".format(np.shape(x)))
 
     aList = []
     zList = []

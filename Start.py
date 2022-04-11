@@ -3,7 +3,8 @@ import Config
 import threading
 import os
 
-from network.functions import train
+from network.training import train_network
+from network.training import bfgs
 
 from game import ConnectFour
 from game import simulate
@@ -38,67 +39,63 @@ def toBinary(y):
 
     return y
 
-if Config.training:
-    ConnectFour.main()
-if Config.simulate:
-    simulationThread = threading.Thread(target=simulate.simulate, args=(Config.gameIterations,))
-    simulationThread.start()
-    ConnectFour.main() #Starts the game ui
-np.set_printoptions(edgeitems=30, linewidth=100000)
 
-#XOR logic gate data values:
-# x = np.array(([0,0],
-#              [0,1],
-#              [1,0],
-#              [1,1])) #0,1,1,0
-#
-# y = np.array(([1,0],
-#               [0,1],
-#               [0,1],
-#               [1,0])) #[False,True]
 
-try:
-    open(Config.player1ThetaDir, 'x')
-except FileExistsError:
-    print("Player 1 theta file exists.")
 
-try:
-    open(Config.player2ThetaDir, 'x')
-except FileExistsError:
-    print("Player 2 theta file exists.")
-
-if Config.trainingPlayer == 1: #get training data
-    x = np.genfromtxt(Config.player1InputDir)
-    y = toBinary(np.genfromtxt(Config.player1OutputDir))
-    epsilon = np.genfromtxt(Config.player1EpsilonDir)
-    train.train(x,y,epsilon,0)
-    print("finished training player 1")
-elif Config.trainingPlayer == 2:
-    x = np.genfromtxt(Config.player2InputDir)
-    y = toBinary(np.genfromtxt(Config.player2OutputDir))
-    epsilon = np.genfromtxt(Config.player2EpsilonDir)
-    train.train(x,y,epsilon,1)
-    print("finished training player 2")
-elif Config.trainingPlayer == 0: #training both
+def train():
     try:
+        open(Config.player1ThetaDir, 'x')
+    except FileExistsError:
+        print("Player 1 theta file exists.")
+
+    try:
+        open(Config.player2ThetaDir, 'x')
+    except FileExistsError:
+        print("Player 2 theta file exists.")
+
+    if Config.trainingPlayer == 1: #get training data
         x = np.genfromtxt(Config.player1InputDir)
         y = toBinary(np.genfromtxt(Config.player1OutputDir))
         epsilon = np.genfromtxt(Config.player1EpsilonDir)
-        train.train(x,y,epsilon,0)
+        train_network.train_network(x,y,epsilon,0)
         print("finished training player 1")
-    except UserWarning:
-        print("no user 1 data. skipping training")
-
-
-    try:
+    elif Config.trainingPlayer == 2:
         x = np.genfromtxt(Config.player2InputDir)
         y = toBinary(np.genfromtxt(Config.player2OutputDir))
         epsilon = np.genfromtxt(Config.player2EpsilonDir)
-        train.train(x,y,epsilon,1)
+        train_network.train_network(x,y,epsilon,1)
         print("finished training player 2")
-    except UserWarning:
-        print("no user 2 data. skipping training")
+    elif Config.trainingPlayer == 0: #training both
+        try:
+            x = np.genfromtxt(Config.player1InputDir)
+            y = toBinary(np.genfromtxt(Config.player1OutputDir))
+            epsilon = np.genfromtxt(Config.player1EpsilonDir)
+            #train_network.train_network(x,y,epsilon,0)
+            print("finished training player 1")
+        except UserWarning:
+            print("no user 1 data. skipping training")
+            return
 
-print("data shapes:")
-print("x: {}".format(np.shape(x)))
-print("y: {}".format(np.shape(y)))
+        bfgs.train_with_bfgs(x,y,np.genfromtxt(Config.player1ThetaDir))
+
+
+        try:
+            x = np.genfromtxt(Config.player2InputDir)
+            y = toBinary(np.genfromtxt(Config.player2OutputDir))
+            epsilon = np.genfromtxt(Config.player2EpsilonDir)
+            #train_network.train_network(x,y,epsilon,1)
+            print("finished training player 2")
+        except UserWarning:
+            print("no user 2 data. skipping training")
+            return
+
+        bfgs.train_with_bfgs(x,y,np.genfromtxt(Config.player2ThetaDir))
+
+
+if Config.training:
+    ConnectFour.main()
+if Config.simulate:
+    simulationThread = threading.Thread(target=simulate.simulate, args=(Config.gameIterations,train))
+    simulationThread.start()
+    ConnectFour.main() #Starts the game ui
+np.set_printoptions(edgeitems=30, linewidth=100000)

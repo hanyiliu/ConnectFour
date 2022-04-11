@@ -1,6 +1,7 @@
 import numpy as np
 import Config
 from network.functions import hypothesis
+from network.functions import reform
 
 def sigmoid(z):
     #print(-z)
@@ -8,10 +9,20 @@ def sigmoid(z):
 def sigmoidGradient(z):
     return sigmoid(z)*(1-sigmoid(z));
 
-def computeGradient(x, t, y): #For only one input and output right now
-    h,a,z = hypothesis.hypothesis(x,t, computingGradient=True) #Step 1
+def computeGradient(t, x, y, flattenGradient=False): #For only one input and output right now
+
+    if isinstance(t,np.ndarray) and np.size(np.shape(t)) == 1:
+        print("gradient yes")
+        t = reform.reformTheta(t) #for bfgs, whose theta input is flattened
+
+    h,a,z = hypothesis.hypothesis(t, x, computingGradient=True) #Step 1
 
     deltaList = []
+
+    print("gradient shapes:")
+    print("x: {}".format(np.shape(x)))
+    print("y: {}".format(np.shape(y)))
+    print("theta: {}".format(len(t)))
 
     #This goes backwards (back-propagation)
     delta = a[-1]-y #for output units
@@ -36,4 +47,9 @@ def computeGradient(x, t, y): #For only one input and output right now
 
     gradientList = [gradient0, gradient1, gradient2]
 
-    return gradientList
+    # if flattenGradient:
+    flattenGradient = np.concatenate((gradient0.flatten(),gradient1.flatten(),gradient2.flatten()))
+    print("returning shape: {}".format(np.shape(flattenGradient)))
+    return flattenGradient
+    # else:
+    #     return gradientList

@@ -4,6 +4,9 @@ import numpy as np
 import Config
 import os
 
+from game import check
+
+
 size = [6,7] #rows, columns; i = row, j = column
 rows = [] #2D array
 buttons = []
@@ -31,11 +34,9 @@ def setEndStatus(newStatus):
     global endStatus
     endStatus = newStatus
 
-def count_consecutive(arr, n):
-    # pad a with False at both sides for edge cases when array starts or ends with n
-    d = np.diff(np.concatenate(([False], arr == n, [False])).astype(int))
-    # subtract indices when value changes from False to True from indices where value changes from True to False
-    return np.flatnonzero(d == -1) - np.flatnonzero(d == 1)
+def quit():
+    global root
+    root.destroy()
 
 def inputStatus(status):
     for i in range(np.size(buttons)):
@@ -44,24 +45,6 @@ def inputStatus(status):
         else:
             buttons[i].config(state=DISABLED)
 
-def check(x,y):
-    vert = board[x] #add 0 zero, need 7
-    hori = np.pad(board[:,y], (0, 1), 'constant') #add 1 zero
-    diag = np.pad(np.diagonal(board,offset=(y-x)), (0, 7-np.size(np.diagonal(board,offset=(y-x)))), 'constant')
-    fdiag = np.pad(np.diagonal(np.flip(board,axis=1),offset=(6-y-x)), (0, 7-np.size(np.diagonal(np.flip(board,axis=1),offset=(6-y-x)))), 'constant') #flipped diagonal
-
-    v = np.array((vert,hori,diag,fdiag))
-    for i in range(np.size(v,0)):
-        if np.any(count_consecutive(v[i],1) >= Config.mustConnect):
-            print("Player 1 Wins.")
-            displayWinner.config(text="Winner: Player 1")
-            inputStatus(False)
-            win(True)
-        elif np.any(count_consecutive(v[i],2) >= Config.mustConnect):
-            print("Player 2 Wins.")
-            displayWinner.config(text="Winner: Player 2")
-            inputStatus(False)
-            win(False)
 
 def move(column): #places piece in column
     global turn
@@ -90,7 +73,17 @@ def move(column): #places piece in column
                 board[i][column] = Config.opponentValue
                 turn = 0
 
-            check(i,column);
+            state = check.check(board,i,column)
+            if state == 1:
+                print("Player 1 Wins.")
+                displayWinner.config(text="Winner: Player 1")
+                inputStatus(False)
+                win(True)
+            elif state == 2:
+                print("Player 2 Wins.")
+                displayWinner.config(text="Winner: Player 2")
+                inputStatus(False)
+                win(False)
             return
 
 def reset():
@@ -110,13 +103,12 @@ def reset():
     setEndStatus(False)
 
 def win(winner): #takes boolean, true for player 1 winning, false for player 2
-    print(winner)
     global endStatus
+    global player1Data
+    global player2Data
     endStatus = True
-    print("endstatus set to true")
-    #beginning data storage
 
-    print(np.shape(player1Data[0])[0])
+    #beginning data storage
 
 
     if winner: #player 1
@@ -126,12 +118,12 @@ def win(winner): #takes boolean, true for player 1 winning, false for player 2
         for i in range(0,np.shape(player1Data[0])[0]):
             epsilonList = np.append(epsilonList,epsilon)
             epsilon = epsilon * Config.epsilonRate
-
+        epsilonList = epsilonList[::-1]
         #saves epsilons
         if os.stat(Config.player1EpsilonDir).st_size == 0: #if empty, write file. Otherwise, append to existing data
             np.savetxt(Config.player1EpsilonDir, epsilonList)
         else:
-            np.savetxt(Config.player2EpsilonDir, np.append(np.genfromtxt(Config.player1EpsilonDir), epsilonList, 0))
+            np.savetxt(Config.player1EpsilonDir, np.append(np.genfromtxt(Config.player1EpsilonDir), epsilonList, 0))
 
         if os.stat(Config.player1InputDir).st_size == 0: #if empty, write file. Otherwise, append to existing data
             np.savetxt(Config.player1InputDir, player1Data[0], fmt='%i')
@@ -150,7 +142,7 @@ def win(winner): #takes boolean, true for player 1 winning, false for player 2
         for i in range(0,np.shape(player2Data[0])[0]):
             epsilonList = np.append(epsilonList,epsilon)
             epsilon = epsilon * Config.epsilonRate
-
+        epsilonList = epsilonList[::-1]
         #saves epsilons
         if os.stat(Config.player2EpsilonDir).st_size == 0: #if empty, write file. Otherwise, append to existing data
             np.savetxt(Config.player2EpsilonDir, epsilonList)
@@ -169,8 +161,13 @@ def win(winner): #takes boolean, true for player 1 winning, false for player 2
             np.savetxt(Config.player2OutputDir, np.append(np.genfromtxt(Config.player2OutputDir), player2Data[1], 0), fmt='%i')
 
 
+    player1Data = ([],[])
+    player2Data = ([],[])
 def main():
 
+    global root
+    global displayWinner
+    root = Tk()
 
     #create files for data storage (if not present)
     try:
@@ -198,7 +195,7 @@ def main():
 
         for j in range(size[1]):
 
-            e = Entry(relief=GROOVE)
+            e = Entry(root,relief=GROOVE)
 
             e.grid(row=i, column=j, sticky=NSEW, padx=5, pady=5, ipadx=1, ipady=1)
 
@@ -218,7 +215,7 @@ def main():
 
     for j in range(size[1]): #create button to place pieces
 
-        b = Button(command=partial(move, j))
+        b = Button(root,command=partial(move, j))
 
         b.grid(row=7, column=j, padx=5, pady=5, ipadx=10, ipady=10)
 
@@ -226,15 +223,14 @@ def main():
 
     displayWinner.grid(row=8, columnspan=4, padx=20, pady=5, ipadx=10, ipady=10, sticky="w")
 
-    r = Button(command=partial(reset))
+    r = Button(root,command=partial(reset))
     r.config(text="Reset")
     r.grid(row=8, column=7, padx=5, pady=5, ipadx=10, ipady=10)
 
     # rows[0][0].config(disabledbackground="purple");
-
+    displayWinner = Label(root,text="Winner: ", justify="left", anchor="w")
     #automated loops
-
-    mainloop()
+    root.mainloop()
 
 
 

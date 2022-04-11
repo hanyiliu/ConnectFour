@@ -6,7 +6,7 @@ from network.functions import hypothesis
 from network.functions import computeGradient
 from network.functions import reform
 
-def train(x, y, epsilon, player): #player = 0,1
+def train_network(x, y, epsilon, player): #player = 0,1
     a = 0.001 #alpha value
     m = np.shape(x)[0]
 
@@ -29,7 +29,7 @@ def train(x, y, epsilon, player): #player = 0,1
         if player == 0:
             t = reform.reformTheta(np.genfromtxt(Config.player1ThetaDir))
         if player == 1:
-            t = reform.reformTheta(np.genfromtxt(Config.player1ThetaDir))
+            t = reform.reformTheta(np.genfromtxt(Config.player2ThetaDir))
         else:
             print("ok how are u actually here now")
     costs = []
@@ -37,8 +37,8 @@ def train(x, y, epsilon, player): #player = 0,1
     g = [np.zeros(np.shape(t[0])), np.zeros(np.shape(t[1])), np.zeros(np.shape(t[2]))] #gradient
     for j in range(0,Config.iterations):
         for i in range(0, np.shape(x)[0]):
-            hypothesis0 = hypothesis.hypothesis(x[i], t)
-            gradient = computeGradient.computeGradient(x[i], t, y[i])
+            hypothesis0 = hypothesis.hypothesis(t, x[i])
+            gradient = computeGradient.computeGradient(t, x[i], y[i])
 
 
             cost0 = cost.cost(hypothesis0,y[i])
@@ -51,9 +51,9 @@ def train(x, y, epsilon, player): #player = 0,1
             costs.append(cost0)
             c = cost0
 
-        t[0] = t[0] - g[0]/m
-        t[1] = t[1] - g[1]/m
-        t[2] = t[2] - g[2]/m
+        t[0] = t[0] - Config.alpha*g[0]/m
+        t[1] = t[1] - Config.alpha*g[1]/m
+        t[2] = t[2] - Config.alpha*g[2]/m
         g = [np.zeros(np.shape(t[0])), np.zeros(np.shape(t[1])), np.zeros(np.shape(t[2]))]
         print("finished iteration {} of {}. cost: {}%".format(j+1, Config.iterations, c))
 
